@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Celengan Pintar — Smart Piggy Bank</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#fff8e6',
+            creamDark: '#f5ebd1',
+            matcha: '#cedba5',
+            matchaDark: '#b3c67d',
+            forest: '#1f2d24',
+            forestLight: '#33483b',
+            amberAccent: '#e69d35',
+            coralDanger: '#d9534f'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+          },
+          boxShadow: {
+            soft: '0 10px 28px -6px rgba(31, 45, 36, 0.10)',
+            card: '0 6px 20px -4px rgba(31, 45, 36, 0.08)',
+            nav: '0 -6px 24px -4px rgba(31, 45, 36, 0.10)'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #ebe3ce;
+      color: #1f2d24;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .app-shell {
+      background-color: #fff8e6;
+      min-height: 100vh;
+      max-width: 460px;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 0 45px rgba(31, 45, 36, 0.14);
+    }
+    /* Custom scrollbar untuk log & daftar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f5ebd1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #b3c67d;
+      border-radius: 9999px;
+    }
+    @keyframes pulseAlarm {
+      0%, 100% { background-color: #fee2e2; border-color: #ef4444; }
+      50% { background-color: #fecaca; border-color: #b91c1c; }
+    }
+    .alarm-flash {
+      animation: pulseAlarm 0.55s infinite;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-matcha selection:text-forest">
+  <!-- Main Mobile-First Container (max-width 460px) -->
+  <div id="app" class="app-shell flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px] pointer-events-none flex flex-col gap-2"></div>
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 1: LOGIN & REGISTER                                -->
+    <!-- ========================================================= -->
+    <section id="auth-screen" class="hidden flex-1 flex flex-col justify-center px-6 py-10">
+      <!-- Brand Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-matcha text-forest shadow-card mb-4">
+          <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/>
+            <path d="M2 9v1c0 1.1.9 2 2 2h1"/>
+            <path d="M16 11h.01"/>
+          </svg>
+        </div>
+        <p class="text-xs font-bold tracking-widest uppercase text-forestLight/75 mb-1">Smart Piggy Bank IoT</p>
+        <h1 id="auth-title" class="font-display text-3xl font-extrabold tracking-tight text-forest">LOGIN</h1>
+      </div>
+
+      <!-- LOGIN FORM (Sesuai sketsa 1: ID, Password + lock icon, LOGIN button, register link) -->
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="login-id" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1.5 ml-1">ID Pengguna</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-forestLight">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </span>
+            <input id="login-id" type="text" required placeholder="Masukkan ID kamu"
+              class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border-2 border-forest/15 text-forest font-medium placeholder:text-forestLight/45 focus:outline-none focus:border-forest transition" />
+          </div>
+        </div>
+
+        <div>
+          <label for="login-password" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1.5 ml-1">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-forestLight">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </span>
+            <input id="login-password" type="password" required placeholder="••••••••"
+              class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border-2 border-forest/15 text-forest font-medium placeholder:text-forestLight/45 focus:outline-none focus:border-forest transition" />
+          </div>
+        </div>
+
+        <button type="submit"
+          class="w-full py-3.5 rounded-2xl bg-forest text-cream font-display font-extrabold text-base tracking-wide shadow-soft hover:bg-forestLight active:scale-[0.99] transition cursor-pointer">
+          LOGIN
+        </button>
+
+        <button type="button" id="demo-login-btn"
+          class="w-full py-3 rounded-2xl bg-matcha/70 text-forest font-bold text-sm border border-forest/15 hover:bg-matcha active:scale-[0.99] transition cursor-pointer">
+          Masuk Cepat (Akun Demo)
+        </button>
+
+        <p class="text-center text-sm text-forestLight pt-2">
+          Don't have acc?
+          <button type="button" id="show-register-btn" class="font-bold text-forest underline decoration-2 underline-offset-4 hover:text-forestLight cursor-pointer">
+            register here
+          </button>
+        </p>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="register-form" class="hidden space-y-3.5">
+        <div>
+          <label for="reg-name" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1 ml-1">Nama Tampilan</label>
+          <input id="reg-name" type="text" required placeholder="Contoh: Raka Pratama"
+            class="w-full px-4 py-3 rounded-2xl bg-white border-2 border-forest/15 text-forest font-medium focus:outline-none focus:border-forest transition" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="reg-id" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1 ml-1">ID Login</label>
+            <input id="reg-id" type="text" required placeholder="raka01"
+              class="w-full px-4 py-3 rounded-2xl bg-white border-2 border-forest/15 text-forest font-medium focus:outline-none focus:border-forest transition" />
+          </div>
+          <div>
+            <label for="reg-pin" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1 ml-1">PIN Kotak (4 Digit)</label>
+            <input id="reg-pin" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" value="1234" required placeholder="1234"
+              class="w-full px-4 py-3 rounded-2xl bg-white border-2 border-forest/15 text-forest font-bold tracking-widest text-center focus:outline-none focus:border-forest transition" />
+          </div>
+        </div>
+
+        <div>
+          <label for="reg-password" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1 ml-1">Password Akun</label>
+          <input id="reg-password" type="password" required placeholder="Buat password"
+            class="w-full px-4 py-3 rounded-2xl bg-white border-2 border-forest/15 text-forest font-medium focus:outline-none focus:border-forest transition" />
+        </div>
+
+        <div>
+          <label for="reg-avatar" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1 ml-1">Foto Profil (Opsional)</label>
+          <input id="reg-avatar" type="file" accept="image/*"
+            class="w-full text-xs text-forestLight file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-matcha file:text-forest hover:file:bg-matchaDark cursor-pointer" />
+        </div>
+
+        <button type="submit"
+          class="w-full py-3.5 rounded-2xl bg-forest text-cream font-display font-extrabold text-base tracking-wide shadow-soft hover:bg-forestLight active:scale-[0.99] transition cursor-pointer">
+          DAFTAR & MASUK
+        </button>
+
+        <p class="text-center text-sm text-forestLight pt-1">
+          Sudah punya akun?
+          <button type="button" id="show-login-btn" class="font-bold text-forest underline decoration-2 underline-offset-4 cursor-pointer">
+            Login di sini
+          </button>
+        </p>
+      </form>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- MAIN AUTHENTICATED APP CONTENT                            -->
+    <!-- ========================================================= -->
+    <main id="main-app" class="hidden flex-1 flex flex-col pb-24">
+
+      <!-- ======================================================= -->
+      <!-- TAB 1: HOME SCREEN (DASHBOARD)                          -->
+      <!-- ======================================================= -->
+      <section id="tab-home" class="px-5 pt-6 space-y-5">
+        <!-- Top Header: Greeting + Circular PIC -->
+        <header class="flex items-center justify-between pb-4 border-b-2 border-forest/10">
+          <div>
+            <p id="greeting-time" class="text-xs font-bold uppercase tracking-wider text-forestLight">Good Morning,</p>
+            <h1 id="greeting-name" class="font-display text-2xl font-extrabold text-forest leading-tight">[Name]!</h1>
+          </div>
+          <button type="button" onclick="switchTab('account')" title="Profil & Pengaturan"
+            class="relative w-13 h-13 rounded-full p-0.5 bg-matcha border-2 border-forest shadow-card overflow-hidden flex-shrink-0 cursor-pointer">
+            <img id="header-avatar-img" src="https://placehold.co/100x100/cedba5/1f2d24?text=PIC"
+              onerror="this.src='https://placehold.co/100x100/cedba5/1f2d24?text=PIC'"
+              alt="Foto Profil" class="w-12 h-12 rounded-full object-cover" />
+          </button>
+        </header>
+
+        <!-- MAIN CARD: CURRENT GOAL (Kiri: berapa/target & uang ditabung, Kanan: Gmbr item) -->
+        <div id="current-goal-card" class="rounded-3xl bg-white border-2 border-forest/12 p-4 shadow-card">
+          <!-- State: Ada Goal Aktif -->
+          <div id="home-active-goal-view" class="hidden">
+            <div class="flex items-stretch justify-between gap-3">
+              <!-- Kiri: Info Goal & Progress -->
+              <div class="flex-1 min-w-0 flex flex-col justify-between pr-2 border-r border-forest/10">
+                <div>
+                  <div class="flex items-center gap-1.5 mb-1">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-forestLight">Current Goal</span>
+                  </div>
+                  <h2 id="home-goal-name" class="font-display text-lg font-extrabold text-forest truncate">Nama Target</h2>
+                  <p class="text-xs text-forestLight mt-1">
+                    <span id="home-goal-saved" class="font-extrabold text-forest text-sm">Rp 0</span>
+                    <span class="text-forestLight/75"> / </span>
+                    <span id="home-goal-target" class="font-semibold">Rp 0</span>
+                  </p>
+                  <p class="text-[11px] text-forestLight/80 mt-0.5">Uang yang ditabung (<span id="home-goal-percent" class="font-bold text-forest">0%</span>)</p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mt-3">
+                  <div class="w-full h-3 rounded-full bg-creamDark overflow-hidden p-0.5">
+                    <div id="home-goal-bar" class="h-full rounded-full bg-gradient-to-r from-matchaDark to-forest transition-all duration-500" style="width: 0%"></div>
+                  </div>
+                  <div class="flex justify-between items-center mt-1.5 text-[10px] font-semibold text-forestLight">
+                    <span id="home-goal-freq">Every day</span>
+                    <span id="home-goal-deadline">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Kanan: Gambar Item -->
+              <div class="w-24 flex-shrink-0 flex flex-col items-center justify-center">
+                <div class="w-24 h-24 rounded-2xl bg-cream border border-forest/15 overflow-hidden flex items-center justify-center shadow-inner">
+                  <img id="home-goal-image" src="https://placehold.co/160x160/cedba5/1f2d24?text=ITEM"
+                    onerror="this.src='https://placehold.co/160x160/cedba5/1f2d24?text=ITEM'"
+                    alt="Gambar Target" class="w-full h-full object-cover" />
+                </div>
+                <span class="text-[10px] font-bold text-forestLight mt-1.5 text-center leading-tight">Gmbr Item</span>
+              </div>
+            </div>
+
+            <!-- Simulasi Sensor Uang Masuk (ESP32 HC-SR04 + TCS3200) -->
+            <div class="mt-4 pt-3.5 border-t border-dashed border-forest/15">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-forest">Simulasi Uang Masuk (ESP32)</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-matcha/70 text-forest">TCS3200 + Ultrasonik</span>
+              </div>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button type="button" onclick="depositMoney(1000)" class="py-2 px-1 rounded-xl bg-cream hover:bg-matcha text-forest font-bold text-xs border border-forest/15 active:scale-95 transition cursor-pointer">+1rb</button>
+                <button type="button" onclick="depositMoney(2000)" class="py-2 px-1 rounded-xl bg-cream hover:bg-matcha text-forest font-bold text-xs border border-forest/15 active:scale-95 transition cursor-pointer">+2rb</button>
+                <button type="button" onclick="depositMoney(5000)" class="py-2 px-1 rounded-xl bg-cream hover:bg-matcha text-forest font-bold text-xs border border-forest/15 active:scale-95 transition cursor-pointer">+5rb</button>
+                <button type="button" onclick="depositMoney(10000)" class="py-2 px-1 rounded-xl bg-cream hover:bg-matcha text-forest font-bold text-xs border border-forest/15 active:scale-95 transition cursor-pointer">+10rb</button>
+                <button type="button" onclick="depositMoney(20000)" class="py-2 px-1 rounded-xl bg-cream hover:bg-matcha text-forest font-bold text-xs border border-forest/15 active:scale-95 transition cursor-pointer">+20rb</button>
+                <button type="button" onclick="depositMoney(50000)" class="py-2 px-1 rounded-xl bg-cream hover:bg-matcha text-forest font-bold text-xs border border-forest/15 active:scale-95 transition cursor-pointer">+50rb</button>
+                <button type="button" onclick="depositMoney(100000)" class="col-span-2 py-2 px-1 rounded-xl bg-matcha hover:bg-matchaDark text-forest font-extrabold text-xs border border-forest/20 active:scale-95 transition cursor-pointer">+100rb</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- State: Belum Ada Goal Aktif -->
+          <div id="home-empty-goal-view" class="py-6 text-center space-y-3">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-matcha/70 text-forest mx-auto">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-display font-extrabold text-base text-forest">Belum Ada Target Aktif</h3>
+              <p class="text-xs text-forestLight mt-1 max-w-[260px] mx-auto">Buat 1 target tabungan baru di tab tengah (+) untuk mulai mengunci celengan pintarmu.</p>
+            </div>
+            <button type="button" onclick="switchTab('center')"
+              class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-forest text-cream font-bold text-xs shadow-sm hover:bg-forestLight transition cursor-pointer">
+              + Buat Goal Baru
+            </button>
+          </div>
+        </div>
+
+        <!-- STREAK CARD: Lamanya Menabung -->
+        <div class="rounded-3xl bg-matcha/65 border-2 border-forest/12 p-4 shadow-card flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-forestLight">Streak</span>
+            <h3 class="font-display text-xl font-extrabold text-forest mt-0.5">
+              <span id="home-streak-days">0</span> Hari Berturut-turut
+            </h3>
+            <p class="text-xs text-forestLight mt-0.5">Lamanya menabung secara konsisten</p>
+          </div>
+          <div class="w-14 h-14 rounded-2xl bg-white/90 border border-forest/15 flex flex-col items-center justify-center shadow-sm">
+            <svg class="w-7 h-7 text-amberAccent" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13.5 2.2c.3 2.5-1.1 4.5-2.6 6.1-1.3 1.4-2.4 2.8-2.4 4.9 0 2.4 1.9 4.3 4.3 4.3 2.7 0 4.7-2.2 4.7-5.1 0-2.1-1.1-4.1-2.5-5.6-.3 1.3-1.1 2.1-2 2.4.5-2.1.7-4.5.5-7zM12 22c-4.4 0-8-3.4-8-7.8 0-3.3 2-6.1 4.3-8.4.4-.4 1.1-.1 1 .5-.2 1.2 0 2.3.6 3.1 1.3-2.4 3.4-4.7 3.7-7.7.1-.6.8-.9 1.3-.5 3.1 2.7 5.1 6.7 5.1 11 0 5.4-3.6 9.8-8 9.8z"/>
+            </svg>
+            <span class="text-[10px] font-extrabold text-forest">STREAK</span>
+          </div>
+        </div>
+
+        <!-- SMART BOX LOCK STATUS & DIGITAL KEYPAD TRIGGER -->
+        <div id="box-lock-card" class="rounded-3xl bg-white border-2 border-forest/15 p-4 shadow-card space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div id="lock-icon-badge" class="w-11 h-11 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span id="box-lock-status-badge" class="text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                    TERKUNCI
+                  </span>
+                  <span id="servo-state-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-creamDark text-forestLight">
+                    Servo: 0° (Tutup)
+                  </span>
+                </div>
+                <p id="box-lock-desc" class="text-xs text-forestLight mt-1 leading-relaxed">
+                  Kotak tidak bisa dibuka sampai goals tercapai apapun kondisinya.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" id="open-keypad-btn" onclick="handleOpenKeypadClick()"
+            class="w-full py-3 rounded-2xl bg-forest/20 text-forest/50 font-display font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span id="open-keypad-btn-text">Terkunci — Capai Target 100% Dulu</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================= -->
+      <!-- TAB 2: CENTER '+' TAB (MODE A: NEW GOALS | MODE B: LOG) -->
+      <!-- ======================================================= -->
+      <section id="tab-center" class="hidden px-5 pt-6 space-y-5">
+
+        <!-- MODE A: NEW GOALS FORM (Hanya tampil jika BELUM ada goal aktif) -->
+        <div id="new-goal-mode" class="space-y-4">
+          <div class="pb-3 border-b-2 border-forest/10">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-forestLight">Single Active Goal</span>
+            <h1 class="font-display text-2xl font-extrabold text-forest">New Goals</h1>
+          </div>
+
+          <form id="new-goal-form" class="space-y-4">
+            <!-- Goal Name -->
+            <div class="rounded-2xl bg-white p-3.5 border border-forest/12 shadow-sm">
+              <label for="goal-name-input" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1">Goal Name</label>
+              <input id="goal-name-input" type="text" required placeholder="Contoh: Beli Laptop / Liburan"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-cream/60 border border-forest/15 text-forest font-semibold focus:outline-none focus:border-forest" />
+            </div>
+
+            <!-- Target Amount -->
+            <div class="rounded-2xl bg-white p-3.5 border border-forest/12 shadow-sm">
+              <label for="goal-target-input" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1">Target Amount (Rp)</label>
+              <input id="goal-target-input" type="number" min="1000" step="1000" required placeholder="500000"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-cream/60 border border-forest/15 text-forest font-bold focus:outline-none focus:border-forest" />
+            </div>
+
+            <!-- Frequency Dropdown -->
+            <div class="rounded-2xl bg-white p-3.5 border border-forest/12 shadow-sm space-y-2.5">
+              <label for="goal-frequency-select" class="block text-xs font-bold uppercase tracking-wider text-forestLight">Frequency</label>
+              <select id="goal-frequency-select"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-cream/60 border border-forest/15 text-forest font-semibold focus:outline-none focus:border-forest">
+                <option value="everyday">1. Every day</option>
+                <option value="custom_days">2. Once every -- day</option>
+              </select>
+
+              <div id="custom-days-wrapper" class="hidden pt-1">
+                <label for="goal-custom-days" class="block text-[11px] font-semibold text-forestLight mb-1">Setiap berapa hari sekali?</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-forest">Once every</span>
+                  <input id="goal-custom-days" type="number" min="2" max="365" value="3"
+                    class="w-20 px-3 py-1.5 rounded-xl bg-cream border border-forest/20 text-center font-bold text-forest" />
+                  <span class="text-xs font-semibold text-forest">day(s)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Amount Per Day (Optional: Specific Amount / Any Amount) -->
+            <div class="rounded-2xl bg-white p-3.5 border border-forest/12 shadow-sm space-y-2.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold uppercase tracking-wider text-forestLight">Amount Per Day (Opsional)</label>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-matcha/60 text-forest">Pilih Mode</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-forest/15 bg-cream/50 cursor-pointer has-[:checked]:bg-matcha has-[:checked]:border-forest">
+                  <input type="radio" name="amountMode" value="any" checked class="accent-forest" />
+                  <span class="text-xs font-bold text-forest">Any Amount</span>
+                </label>
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-forest/15 bg-cream/50 cursor-pointer has-[:checked]:bg-matcha has-[:checked]:border-forest">
+                  <input type="radio" name="amountMode" value="specific" class="accent-forest" />
+                  <span class="text-xs font-bold text-forest">Specific Amount</span>
+                </label>
+              </div>
+              <div id="specific-amount-wrapper" class="hidden pt-1">
+                <input id="goal-specific-amount" type="number" min="1000" step="1000" placeholder="Nominal per setor (mis. 10000)"
+                  class="w-full px-3.5 py-2 rounded-xl bg-cream/60 border border-forest/15 text-forest font-bold text-sm focus:outline-none focus:border-forest" />
+              </div>
+            </div>
+
+            <!-- Start & Done Time -->
+            <div class="rounded-2xl bg-white p-3.5 border border-forest/12 shadow-sm grid grid-cols-2 gap-3">
+              <div>
+                <label for="goal-start-time" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1">Start Time</label>
+                <input id="goal-start-time" type="datetime-local" required
+                  class="w-full px-2.5 py-2 rounded-xl bg-cream/60 border border-forest/15 text-forest font-semibold text-xs focus:outline-none focus:border-forest" />
+              </div>
+              <div>
+                <label for="goal-done-time" class="block text-xs font-bold uppercase tracking-wider text-forestLight mb-1">Done Time</label>
+                <input id="goal-done-time" type="datetime-local" required
+                  class="w-full px-2.5 py-2 rounded-xl bg-cream/60 border border-forest/15 text-forest font-semibold text-xs focus:outline-none focus:border-forest" />
+              </div>
+            </div>
+
+            <!-- Insert Pic (Optional) -->
+            <div class="rounded-2xl bg-white p-3.5 border border-forest/12 shadow-sm space-y-2.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold uppercase tracking-wider text-forestLight">Insert Pic (Optional)</label>
+                <span class="text-[10px] text-forestLight">Upload atau pilih ikon</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <img id="new-goal-pic-preview" src="https://placehold.co/120x120/cedba5/1f2d24?text=GOAL"
+                  alt="Preview Target" class="w-16 h-16 rounded-2xl object-cover border border-forest/15 bg-cream flex-shrink-0" />
+                <div class="flex-1 space-y-2">
+                  <input id="goal-pic-file" type="file" accept="image/*"
+                    class="w-full text-xs text-forestLight file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-matcha file:text-forest cursor-pointer" />
+                  <div class="flex gap-1.5">
+                    <button type="button" onclick="selectPresetGoalImage('LAPTOP', '#cedba5')" class="px-2 py-1 rounded-lg bg-cream text-[10px] font-bold border border-forest/15 hover:bg-matcha cursor-pointer">Laptop</button>
+                    <button type="button" onclick="selectPresetGoalImage('LIBURAN', '#f3d58d')" class="px-2 py-1 rounded-lg bg-cream text-[10px] font-bold border border-forest/15 hover:bg-matcha cursor-pointer">Liburan</button>
+                    <button type="button" onclick="selectPresetGoalImage('MOTOR', '#b8d8be')" class="px-2 py-1 rounded-lg bg-cream text-[10px] font-bold border border-forest/15 hover:bg-matcha cursor-pointer">Motor</button>
+                    <button type="button" onclick="selectPresetGoalImage('DARURAT', '#e8c4b8')" class="px-2 py-1 rounded-lg bg-cream text-[10px] font-bold border border-forest/15 hover:bg-matcha cursor-pointer">Darurat</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- START BUTTON -->
+            <button type="submit"
+              class="w-full py-4 rounded-2xl bg-forest text-cream font-display font-extrabold text-base tracking-widest uppercase shadow-soft hover:bg-forestLight active:scale-[0.99] transition cursor-pointer">
+              START
+            </button>
+          </form>
+        </div>
+
+        <!-- MODE B: GOAL CONTROL PANEL & DEPOSIT LOG (Otomatis aktif jika sudah ada 1 goal) -->
+        <div id="control-panel-mode" class="hidden space-y-4">
+          <div class="pb-3 border-b-2 border-forest/10 flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-forestLight">1 Goal Aktif Sedang Berjalan</span>
+              <h1 class="font-display text-2xl font-extrabold text-forest">Control Panel</h1>
+            </div>
+            <span class="px-2.5 py-1 rounded-xl bg-matcha text-forest font-extrabold text-xs">Single-Goal Lock</span>
+          </div>
+
+          <!-- Aturan Kunci & Single Goal Notice -->
+          <div class="rounded-2xl bg-amber-50 border border-amber-300/80 p-3.5 text-xs text-amber-950 space-y-1">
+            <p class="font-bold">Aturan Celengan Pintar Aktif:</p>
+            <p class="leading-relaxed">• Kamu hanya bisa memiliki <strong>1 goal aktif</strong> pada satu waktu hingga target tercapai.</p>
+            <p class="leading-relaxed">• Kotak <strong>tidak dapat dibuka</strong> (baik keypad fisik ESP32 maupun digital) sebelum target 100% tercapai.</p>
+          </div>
+
+          <!-- Ringkasan Goal di Control Panel -->
+          <div class="rounded-3xl bg-white border-2 border-forest/12 p-4 shadow-card space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-[11px] font-bold uppercase text-forestLight">Target Aktif</p>
+                <h2 id="cp-goal-name" class="font-display text-lg font-extrabold text-forest">-</h2>
+              </div>
+              <span id="cp-goal-percent" class="px-3 py-1 rounded-full bg-forest text-cream font-extrabold text-xs">0%</span>
+            </div>
+            <div class="flex justify-between text-xs font-semibold text-forestLight">
+              <span>Terkumpul: <strong id="cp-goal-saved" class="text-forest">Rp 0</strong></span>
+              <span>Target: <strong id="cp-goal-target" class="text-forest">Rp 0</strong></span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-creamDark overflow-hidden">
+              <div id="cp-goal-bar" class="h-full bg-forest transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="pt-1 flex items-center justify-between text-[11px] text-forestLight">
+              <span id="cp-goal-mode-info">Mode: Any Amount</span>
+              <button type="button" onclick="openKeypadFromControlPanel()"
+                class="font-bold text-forest underline decoration-2 underline-offset-2 cursor-pointer">
+                Cek Keypad Kotak →
+              </button>
+            </div>
+          </div>
+
+          <!-- Log Tabungan (Jam berapa masukin duit di hari apa) -->
+          <div class="rounded-3xl bg-white border-2 border-forest/12 p-4 shadow-card space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-display font-extrabold text-base text-forest">Log Tabungan</h3>
+                <p class="text-[11px] text-forestLight">Riwayat hari & jam uang masuk ke celengan</p>
+              </div>
+              <span id="cp-log-count" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-creamDark text-forest">0x setor</span>
+            </div>
+
+            <div id="cp-deposit-log-list" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+              <!-- Diisi via JS -->
+            </div>
+          </div>
+
+          <!-- Opsi Reset / Batalkan Goal (Untuk Testing) -->
+          <div class="pt-2 text-center">
+            <button type="button" onclick="confirmCancelActiveGoal()"
+              class="px-4 py-2 rounded-xl border border-red-300 bg-red-50/70 text-red-700 font-bold text-xs hover:bg-red-100 transition cursor-pointer">
+              Batalkan / Reset Goal Aktif (Mode Testing)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================= -->
+      <!-- TAB 3: ACCOUNT & STATISTICS                             -->
+      <!-- ======================================================= -->
+      <section id="tab-account" class="hidden px-5 pt-6 space-y-5">
+        <!-- Header: Account + Dropdown Menu (Weekly, Monthly, Yearly) -->
+        <header class="flex items-center justify-between pb-3 border-b-2 border-forest/10">
+          <h1 class="font-display text-2xl font-extrabold text-forest">Account</h1>
+          <select id="stats-period-select" onchange="renderStatisticsChart()"
+            class="px-3.5 py-2 rounded-xl bg-matcha border-2 border-forest/20 text-forest font-extrabold text-xs focus:outline-none cursor-pointer">
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </header>
+
+        <!-- STATISTIC CARD -->
+        <div class="rounded-3xl bg-white border-2 border-forest/12 p-4 shadow-card space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-forestLight">Statistic</span>
+              <h2 id="stats-total-period" class="font-display text-xl font-extrabold text-forest">Rp 0</h2>
+            </div>
+            <span id="stats-period-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-creamDark text-forest">7 Hari Terakhir</span>
+          </div>
+
+          <!-- Responsive HTML5 Canvas Chart -->
+          <div class="w-full h-44 relative">
+            <canvas id="stats-canvas" class="w-full h-full block"></canvas>
+          </div>
+        </div>
+
+        <!-- ALL GOALS (Downloadable as a cool card w/ statistics) -->
+        <div class="space-y-3">
+          <div>
+            <h2 class="font-display text-lg font-extrabold text-forest">All Goals</h2>
+            <p class="text-xs text-forestLight">Unduh kartu pencapaian & statistik tiap goal sebagai gambar (PNG)</p>
+          </div>
+
+          <div id="all-goals-list" class="space-y-3">
+            <!-- Diisi via JS -->
+          </div>
+        </div>
+
+        <!-- ACCOUNT SETTINGS -->
+        <div class="rounded-3xl bg-white border-2 border-forest/12 p-4 shadow-card space-y-4">
+          <div class="flex items-center justify-between border-b border-forest/10 pb-2.5">
+            <h2 class="font-display text-base font-extrabold text-forest">Account Settings</h2>
+            <button type="button" onclick="logoutUser()"
+              class="text-xs font-extrabold text-red-600 hover:text-red-800 cursor-pointer">
+              Keluar (Logout)
+            </button>
+          </div>
+
+          <form id="account-settings-form" class="space-y-3">
+            <div>
+              <label for="settings-name" class="block text-xs font-bold text-forestLight mb-1">Nama Tampilan</label>
+              <input id="settings-name" type="text" required
+                class="w-full px-3.5 py-2.5 rounded-xl bg-cream/60 border border-forest/15 text-forest font-semibold text-sm focus:outline-none focus:border-forest" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="settings-pin" class="block text-xs font-bold text-forestLight mb-1">PIN Celengan (4 Digit)</label>
+                <input id="settings-pin" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-cream/60 border border-forest/15 text-forest font-extrabold text-center tracking-widest text-sm focus:outline-none focus:border-forest" />
+              </div>
+              <div>
+                <label for="settings-avatar" class="block text-xs font-bold text-forestLight mb-1">Ganti Foto (PIC)</label>
+                <input id="settings-avatar" type="file" accept="image/*"
+                  class="w-full text-[11px] text-forestLight file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:font-bold file:bg-matcha file:text-forest cursor-pointer" />
+              </div>
+            </div>
+
+            <!-- Browser Notification Reminder Toggle -->
+            <div class="flex items-center justify-between p-3 rounded-2xl bg-cream border border-forest/12">
+              <div class="pr-2">
+                <p class="text-xs font-bold text-forest">Pengingat Notifikasi Harian</p>
+                <p class="text-[11px] text-forestLight">Aktifkan notifikasi browser untuk jadwal menabung</p>
+              </div>
+              <button type="button" id="notif-toggle-btn" onclick="toggleNotificationReminder()"
+                class="px-3 py-1.5 rounded-xl bg-forest text-cream font-bold text-xs flex-shrink-0 cursor-pointer">
+                Aktifkan
+              </button>
+            </div>
+
+            <button type="submit"
+              class="w-full py-3 rounded-2xl bg-forest text-cream font-display font-bold text-sm hover:bg-forestLight transition cursor-pointer">
+              Simpan Pengaturan
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- BOTTOM NAVIGATION BAR (3 TABS: Home | + | Account)        -->
+    <!-- ========================================================= -->
+    <nav id="bottom-nav" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[460px] bg-white/95 backdrop-blur-md border-t-2 border-forest/10 px-8 py-2.5 shadow-nav z-30">
+      <div class="flex items-center justify-between">
+        <!-- Left: Home -->
+        <button type="button" id="nav-home" onclick="switchTab('home')"
+          class="flex flex-col items-center justify-center p-2 rounded-2xl text-forest transition cursor-pointer">
+          <div id="nav-home-pill" class="w-11 h-11 rounded-full bg-matcha flex items-center justify-center border-2 border-forest transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z" />
+            </svg>
+          </div>
+          <span class="text-[10px] font-extrabold mt-1">Home</span>
+        </button>
+
+        <!-- Center: Plus '+' Circle Button -->
+        <button type="button" id="nav-center" onclick="switchTab('center')"
+          class="flex flex-col items-center justify-center -mt-6 cursor-pointer">
+          <div id="nav-center-pill" class="w-14 h-14 rounded-full bg-forest text-cream flex items-center justify-center border-4 border-cream shadow-soft hover:scale-105 active:scale-95 transition">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+            </svg>
+          </div>
+          <span id="nav-center-label" class="text-[10px] font-extrabold text-forest mt-1">New Goal</span>
+        </button>
+
+        <!-- Right: Account / Profile -->
+        <button type="button" id="nav-account" onclick="switchTab('account')"
+          class="flex flex-col items-center justify-center p-2 rounded-2xl text-forestLight transition cursor-pointer">
+          <div id="nav-account-pill" class="w-11 h-11 rounded-full bg-transparent flex items-center justify-center border-2 border-transparent transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <span class="text-[10px] font-extrabold mt-1">Account</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 1: DIGITAL 4x4 KEYPAD (SYNCED WITH ESP32 LOGIC)     -->
+    <!-- ========================================================= -->
+    <div id="keypad-modal" class="hidden fixed inset-0 z-40 bg-forest/65 backdrop-blur-xs flex items-center justify-center p-4">
+      <div id="keypad-modal-card" class="w-full max-w-[390px] rounded-3xl bg-cream border-2 border-forest p-5 shadow-2xl animate-pop space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-matcha text-forest">ESP32 Synced Keypad</span>
+            <h3 class="font-display text-lg font-extrabold text-forest mt-1">Kunci Celengan Pintar</h3>
+          </div>
+          <button type="button" onclick="closeKeypadModal()"
+            class="w-9 h-9 rounded-full bg-white border border-forest/15 flex items-center justify-center text-forest font-bold hover:bg-creamDark cursor-pointer">
+            ✕
+          </button>
+        </div>
+
+        <!-- OLED-like Status Screen -->
+        <div id="oled-sim-screen" class="rounded-2xl bg-forest text-cream p-3.5 font-mono space-y-1.5 border-2 border-forestLight">
+          <div class="flex justify-between text-[11px] text-matcha">
+            <span id="oled-top-status">KUNCI: TERTUTUP</span>
+            <span id="oled-servo-angle">SERVO: 0°</span>
+          </div>
+          <div class="text-center py-1">
+            <span class="text-xs text-cream/70">PIN: </span>
+            <span id="oled-pin-display" class="text-2xl font-extrabold tracking-[0.35em] text-white">----</span>
+          </div>
+          <p id="oled-sub-message" class="text-[11px] text-center text-matcha">Masukkan PIN + # | 0# Tutup</p>
+        </div>
+
+        <!-- 4x4 Keypad Grid (Persis layout ESP32: 123A / 456B / 789C / *0#D) -->
+        <div class="grid grid-cols-4 gap-2">
+          <button type="button" onclick="pressKeypadKey('1')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">1</button>
+          <button type="button" onclick="pressKeypadKey('2')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">2</button>
+          <button type="button" onclick="pressKeypadKey('3')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">3</button>
+          <button type="button" onclick="pressKeypadKey('A')" class="py-3 rounded-xl bg-creamDark border border-forest/15 font-display font-bold text-sm text-forestLight hover:bg-matcha active:scale-95 transition cursor-pointer">A</button>
+
+          <button type="button" onclick="pressKeypadKey('4')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">4</button>
+          <button type="button" onclick="pressKeypadKey('5')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">5</button>
+          <button type="button" onclick="pressKeypadKey('6')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">6</button>
+          <button type="button" onclick="pressKeypadKey('B')" class="py-3 rounded-xl bg-creamDark border border-forest/15 font-display font-bold text-sm text-forestLight hover:bg-matcha active:scale-95 transition cursor-pointer">B</button>
+
+          <button type="button" onclick="pressKeypadKey('7')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">7</button>
+          <button type="button" onclick="pressKeypadKey('8')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">8</button>
+          <button type="button" onclick="pressKeypadKey('9')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">9</button>
+          <button type="button" onclick="pressKeypadKey('C')" class="py-3 rounded-xl bg-creamDark border border-forest/15 font-display font-bold text-sm text-forestLight hover:bg-matcha active:scale-95 transition cursor-pointer">C</button>
+
+          <button type="button" onclick="pressKeypadKey('*')" class="py-3 rounded-xl bg-red-100 border border-red-300 font-display font-extrabold text-base text-red-700 hover:bg-red-200 active:scale-95 transition cursor-pointer" title="Hapus / Stop Alarm">*</button>
+          <button type="button" onclick="pressKeypadKey('0')" class="py-3 rounded-xl bg-white border border-forest/15 font-display font-extrabold text-base text-forest hover:bg-matcha active:scale-95 transition cursor-pointer">0</button>
+          <button type="button" onclick="pressKeypadKey('#')" class="py-3 rounded-xl bg-forest text-cream font-display font-extrabold text-base hover:bg-forestLight active:scale-95 transition cursor-pointer" title="Enter">#</button>
+          <button type="button" onclick="pressKeypadKey('D')" class="py-3 rounded-xl bg-creamDark border border-forest/15 font-display font-bold text-sm text-forestLight hover:bg-matcha active:scale-95 transition cursor-pointer">D</button>
+        </div>
+
+        <p class="text-[11px] text-center text-forestLight">
+          Tekan <strong>PIN + #</strong> untuk buka (90°), <strong>0 + #</strong> untuk tutup, <strong>*</strong> untuk hapus / matikan alarm.
+        </p>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 2: GOAL COMPLETED CELEBRATION & DOWNLOADABLE CARD   -->
+    <!-- ========================================================= -->
+    <div id="celebration-modal" class="hidden fixed inset-0 z-50 bg-forest/75 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div class="w-full max-w-[410px] rounded-3xl bg-cream border-2 border-forest p-5 shadow-2xl animate-pop space-y-4 my-auto">
+        <div class="text-center space-y-1">
+          <span class="inline-block px-3 py-1 rounded-full bg-matcha text-forest font-extrabold text-xs uppercase tracking-wider">
+            Goal Tercapai! 🎉
+          </span>
+          <h2 class="font-display text-2xl font-extrabold text-forest">Selamat, Target Penuh!</h2>
+          <p class="text-xs text-forestLight">Celengan pintarmu sekarang sudah bisa dibuka menggunakan PIN.</p>
+        </div>
+
+        <!-- Styled Achievement Card Preview -->
+        <div class="rounded-2xl bg-forest text-cream p-4 border-2 border-matcha space-y-3 shadow-card">
+          <div class="flex items-center justify-between border-b border-cream/15 pb-2.5">
+            <div>
+              <p class="text-[10px] uppercase tracking-widest text-matcha font-bold">Achievement Card</p>
+              <h3 id="celeb-goal-name" class="font-display text-lg font-extrabold text-white">Target Goal</h3>
+            </div>
+            <span class="text-2xl">🏆</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 text-xs">
+            <div class="p-2.5 rounded-xl bg-forestLight/70">
+              <p class="text-cream/70 text-[10px]">Target Goal</p>
+              <p id="celeb-target-amount" class="font-extrabold text-sm text-white mt-0.5">Rp 0</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-forestLight/70">
+              <p class="text-cream/70 text-[10px]">Total Terkumpul</p>
+              <p id="celeb-saved-amount" class="font-extrabold text-sm text-matcha mt-0.5">Rp 0</p>
+            </div>
+          </div>
+
+          <!-- Excess / Surplus Amount Box (Selalu ditampilkan jika lebih, atau info pas) -->
+          <div id="celeb-surplus-box" class="p-3 rounded-xl bg-matcha text-forest text-xs space-y-0.5">
+            <p class="font-extrabold">Kelebihan Tabungan: <span id="celeb-surplus-amount">Rp 0</span></p>
+            <p id="celeb-surplus-note" class="text-[11px] font-medium">Luar biasa! Uang lebihnya tetap tersimpan aman di celengan.</p>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-cream/80 pt-1">
+            <span>Streak: <strong id="celeb-streak" class="text-matcha">0 Hari</strong></span>
+            <span id="celeb-date">Selesai Hari Ini</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-2">
+          <button type="button" id="celeb-download-btn"
+            class="w-full py-3.5 rounded-2xl bg-matcha hover:bg-matchaDark text-forest font-display font-extrabold text-sm flex items-center justify-center gap-2 border border-forest/20 shadow-sm transition cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            Download Card Statistik (PNG)
+          </button>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="closeCelebrationAndOpenKeypad()"
+              class="py-3 rounded-2xl bg-forest text-cream font-bold text-xs hover:bg-forestLight transition cursor-pointer">
+              Buka Kotak (Keypad)
+            </button>
+            <button type="button" onclick="archiveCompletedGoal()"
+              class="py-3 rounded-2xl bg-white border border-forest/20 text-forest font-bold text-xs hover:bg-creamDark transition cursor-pointer">
+              Arsipkan & Buat Baru
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Confirm Modal (Pengganti confirm() browser) -->
+    <div id="custom-confirm-modal" class="hidden fixed inset-0 z-50 bg-forest/70 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="w-full max-w-[350px] rounded-3xl bg-cream border-2 border-forest p-5 shadow-2xl animate-pop space-y-4">
+        <h3 id="confirm-modal-title" class="font-display text-lg font-extrabold text-forest">Konfirmasi</h3>
+        <p id="confirm-modal-msg" class="text-xs text-forestLight leading-relaxed">Apakah kamu yakin?</p>
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <button type="button" id="confirm-cancel-btn"
+            class="py-2.5 rounded-xl bg-white border border-forest/20 text-forest font-bold text-xs hover:bg-creamDark cursor-pointer">
+            Batal
+          </button>
+          <button type="button" id="confirm-ok-btn"
+            class="py-2.5 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 cursor-pointer">
+            Ya, Lanjutkan
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Hidden Canvas for Generating High-Res PNG Goal Cards -->
+  <canvas id="export-card-canvas" width="900" height="540" class="hidden"></canvas>
+
+  <script>
+    // =========================================================================
+    // STATE MANAGEMENT & LOCALSTORAGE KEYS
+    // =========================================================================
+    const STORAGE_USERS_KEY = 'celengan_pintar_users_v1';
+    const STORAGE_SESSION_KEY = 'celengan_pintar_session_v1';
+
+    let currentUser = null;
+    let currentTab = 'home';
+
+    // State simulasi hardware kotak ESP32
+    let boxIsOpen = false;
+    let keypadBuffer = '';
+    let alarmActive = false;
+    let alarmInterval = null;
+    let audioCtx = null;
+
+    // =========================================================================
+    // WEB AUDIO API: CELEBRATION JINGLE & KEYPAD ALARM BUZZER
+    // =========================================================================
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Jingle perayaan saat goal tercapai (sesuai catatan: "ada jinglenya gitu dari web aja")
+    function playCelebrationJingle() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const notes = [
+          { freq: 523.25, time: 0.00, dur: 0.14 }, // C5
+          { freq: 659.25, time: 0.14, dur: 0.14 }, // E5
+          { freq: 783.99, time: 0.28, dur: 0.14 }, // G5
+          { freq: 1046.50, time: 0.44, dur: 0.35 }, // C6
+          { freq: 783.99, time: 0.82, dur: 0.14 }, // G5
+          { freq: 1046.50, time: 0.98, dur: 0.45 }  // C6
+        ];
+
+        const now = ctx.currentTime;
+        notes.forEach((n) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(n.freq, now + n.time);
+
+          gain.gain.setValueAtTime(0.001, now + n.time);
+          gain.gain.exponentialRampToValueAtTime(0.22, now + n.time + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + n.dur);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + n.time);
+          osc.stop(now + n.time + n.dur + 0.02);
+        });
+      } catch (e) {
+        console.warn('Audio jingle tidak dapat diputar:', e);
+      }
+    }
+
+    function playKeyBeep(freq = 880, duration = 0.06) {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration + 0.01);
+      } catch (e) {}
+    }
+
+    function startAlarmBuzzer() {
+      if (alarmActive) return;
+      alarmActive = true;
+      document.getElementById('keypad-modal-card').classList.add('alarm-flash');
+
+      let toggle = false;
+      const beepOnce = () => {
+        if (!alarmActive) return;
+        playKeyBeep(toggle ? 2200 : 1550, 0.14);
+        toggle = !toggle;
+      };
+      beepOnce();
+      alarmInterval = setInterval(beepOnce, 220);
+    }
+
+    function stopAlarmBuzzer() {
+      alarmActive = false;
+      if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+      }
+      const card = document.getElementById('keypad-modal-card');
+      if (card) card.classList.remove('alarm-flash');
+    }
+
+    // =========================================================================
+    // HELPER FUNCTIONS (FORMAT RUPIAH, TOAST, CUSTOM CONFIRM)
+    // =========================================================================
+    function formatRupiah(num) {
+      const val = Math.round(Number(num) || 0);
+      return 'Rp ' + val.toLocaleString('id-ID');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      let styleClass = 'bg-forest text-cream border-matcha';
+      if (type === 'success') styleClass = 'bg-emerald-900 text-cream border-emerald-400';
+      if (type === 'error') styleClass = 'bg-red-800 text-white border-red-300';
+      if (type === 'warning') styleClass = 'bg-amber-800 text-cream border-amber-300';
+
+      toast.className = `px-4 py-3 rounded-2xl border-2 shadow-lg text-xs font-bold flex items-center justify-between gap-2 animate-pop ${styleClass}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 2800);
+    }
+
+    function showCustomConfirm(title, message, onConfirm) {
+      const modal = document.getElementById('custom-confirm-modal');
+      document.getElementById('confirm-modal-title').textContent = title;
+      document.getElementById('confirm-modal-msg').textContent = message;
+      modal.classList.remove('hidden');
+
+      const cancelBtn = document.getElementById('confirm-cancel-btn');
+      const okBtn = document.getElementById('confirm-ok-btn');
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        cancelBtn.onclick = null;
+        okBtn.onclick = null;
+      };
+
+      cancelBtn.onclick = cleanup;
+      okBtn.onclick = () => {
+        cleanup();
+        onConfirm();
+      };
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // =========================================================================
+    // DATABASE / USER PERSISTENCE
+    // =========================================================================
+    function getAllUsers() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_USERS_KEY)) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveAllUsers(users) {
+      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+    }
+
+    function saveCurrentUserState() {
+      if (!currentUser) return;
+      const users = getAllUsers();
+      users[currentUser.id] = currentUser;
+      saveAllUsers(users);
+      localStorage.setItem(STORAGE_SESSION_KEY, currentUser.id);
+    }
+
+    function ensureDemoUserExists() {
+      const users = getAllUsers();
+      if (!users['demo']) {
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+        const nextMonth = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+        users['demo'] = {
+          id: 'demo',
+          name: 'Alex',
+          password: '123',
+          pin: '1234',
+          avatar: 'https://placehold.co/120x120/cedba5/1f2d24?text=ALEX',
+          notifEnabled: false,
+          activeGoal: {
+            id: 'goal_demo_1',
+            name: 'Headphone Wireless',
+            targetAmount: 200000,
+            savedAmount: 150000,
+            frequencyType: 'everyday',
+            customDays: 1,
+            amountMode: 'specific',
+            specificAmount: 25000,
+            startTime: twoDaysAgo.toISOString(),
+            doneTime: nextMonth.toISOString(),
+            image: 'https://placehold.co/200x200/cedba5/1f2d24?text=AUDIO',
+            status: 'active',
+            logs: [
+              { amount: 50000, timestamp: twoDaysAgo.toISOString(), cumulative: 50000 },
+              { amount: 50000, timestamp: yesterday.toISOString(), cumulative: 100000 },
+              { amount: 50000, timestamp: now.toISOString(), cumulative: 150000 }
+            ]
+          },
+          completedGoals: [
+            {
+              id: 'goal_done_0',
+              name: 'Sepatu Lari',
+              targetAmount: 300000,
+              savedAmount: 320000,
+              surplusAmount: 20000,
+              frequencyType: 'everyday',
+              customDays: 1,
+              startTime: new Date(now.getTime() - 15 * 86400000).toISOString(),
+              doneTime: new Date(now.getTime() - 3 * 86400000).toISOString(),
+              completedAt: new Date(now.getTime() - 3 * 86400000).toISOString(),
+              streakDays: 12,
+              image: 'https://placehold.co/200x200/b3c67d/1f2d24?text=SHOES',
+              status: 'completed',
+              logs: [
+                { amount: 100000, timestamp: new Date(now.getTime() - 10 * 86400000).toISOString(), cumulative: 100000 },
+                { amount: 100000, timestamp: new Date(now.getTime() - 6 * 86400000).toISOString(), cumulative: 200000 },
+                { amount: 120000, timestamp: new Date(now.getTime() - 3 * 86400000).toISOString(), cumulative: 320000 }
+              ]
+            }
+          ]
+        };
+        saveAllUsers(users);
+      }
+    }
+
+    // =========================================================================
+    // AUTHENTICATION HANDLERS
+    // =========================================================================
+    document.getElementById('show-register-btn').addEventListener('click', () => {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+      document.getElementById('auth-title').textContent = 'REGISTER';
+    });
+
+    document.getElementById('show-login-btn').addEventListener('click', () => {
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+      document.getElementById('auth-title').textContent = 'LOGIN';
+    });
+
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('login-id').value.trim().toLowerCase();
+      const pass = document.getElementById('login-password').value;
+      const users = getAllUsers();
+
+      if (!users[id] || users[id].password !== pass) {
+        showToast('ID atau Password salah!', 'error');
+        return;
+      }
+
+      currentUser = users[id];
+      saveCurrentUserState();
+      enterAuthenticatedApp();
+      showToast(`Selamat datang kembali, ${currentUser.name}!`, 'success');
+    });
+
+    document.getElementById('demo-login-btn').addEventListener('click', () => {
+      ensureDemoUserExists();
+      const users = getAllUsers();
+      currentUser = users['demo'];
+      saveCurrentUserState();
+      enterAuthenticatedApp();
+      showToast('Masuk sebagai Akun Demo (PIN Kotak: 1234)', 'success');
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const id = document.getElementById('reg-id').value.trim().toLowerCase();
+      const pin = document.getElementById('reg-pin').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const avatarFile = document.getElementById('reg-avatar').files[0];
+
+      if (!/^\d{4}$/.test(pin)) {
+        showToast('PIN kotak harus 4 digit angka!', 'error');
+        return;
+      }
+
+      const users = getAllUsers();
+      if (users[id]) {
+        showToast('ID sudah terdaftar, gunakan ID lain.', 'error');
+        return;
+      }
+
+      let avatarUrl = `https://placehold.co/120x120/cedba5/1f2d24?text=${encodeURIComponent(name.slice(0, 4).toUpperCase())}`;
+      if (avatarFile) {
+        try {
+          avatarUrl = await readFileAsDataURL(avatarFile);
+        } catch (err) {}
+      }
+
+      currentUser = {
+        id,
+        name,
+        password,
+        pin,
+        avatar: avatarUrl,
+        notifEnabled: false,
+        activeGoal: null,
+        completedGoals: []
+      };
+
+      saveCurrentUserState();
+      enterAuthenticatedApp();
+      showToast('Akun berhasil dibuat!', 'success');
+    });
+
+    function logoutUser() {
+      stopAlarmBuzzer();
+      localStorage.removeItem(STORAGE_SESSION_KEY);
+      currentUser = null;
+      document.getElementById('main-app').classList.add('hidden');
+      document.getElementById('bottom-nav').classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('hidden');
+      showToast('Berhasil keluar dari akun.', 'info');
+    }
+
+    function enterAuthenticatedApp() {
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      document.getElementById('bottom-nav').classList.remove('hidden');
+
+      setDefaultGoalDates();
+      populateAccountSettings();
+      switchTab('home');
+    }
+
+    // =========================================================================
+    // NAVIGATION (3 TABS: HOME | CENTER '+' | ACCOUNT)
+    // =========================================================================
+    function switchTab(tab) {
+      currentTab = tab;
+
+      document.getElementById('tab-home').classList.add('hidden');
+      document.getElementById('tab-center').classList.add('hidden');
+      document.getElementById('tab-account').classList.add('hidden');
+
+      // Reset bottom nav styles
+      const homePill = document.getElementById('nav-home-pill');
+      const accountPill = document.getElementById('nav-account-pill');
+      const navHome = document.getElementById('nav-home');
+      const navAccount = document.getElementById('nav-account');
+
+      homePill.className = 'w-11 h-11 rounded-full bg-transparent flex items-center justify-center border-2 border-transparent transition';
+      accountPill.className = 'w-11 h-11 rounded-full bg-transparent flex items-center justify-center border-2 border-transparent transition';
+      navHome.classList.replace('text-forest', 'text-forestLight');
+      navAccount.classList.replace('text-forest', 'text-forestLight');
+
+      if (tab === 'home') {
+        document.getElementById('tab-home').classList.remove('hidden');
+        homePill.className = 'w-11 h-11 rounded-full bg-matcha flex items-center justify-center border-2 border-forest transition';
+        navHome.classList.replace('text-forestLight', 'text-forest');
+        renderHomeScreen();
+      } else if (tab === 'center') {
+        document.getElementById('tab-center').classList.remove('hidden');
+        renderCenterTab();
+      } else if (tab === 'account') {
+        document.getElementById('tab-account').classList.remove('hidden');
+        accountPill.className = 'w-11 h-11 rounded-full bg-matcha flex items-center justify-center border-2 border-forest transition';
+        navAccount.classList.replace('text-forestLight', 'text-forest');
+        renderAccountScreen();
+      }
+
+      updateCenterNavBadge();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateCenterNavBadge() {
+      const label = document.getElementById('nav-center-label');
+      if (currentUser && currentUser.activeGoal) {
+        label.textContent = 'Control';
+      } else {
+        label.textContent = 'New Goal';
+      }
+    }
+
+    // =========================================================================
+    // STREAK CALCULATION
+    // =========================================================================
+    function calculateStreakDays() {
+      if (!currentUser) return 0;
+      const allLogs = [];
+      if (currentUser.activeGoal && Array.isArray(currentUser.activeGoal.logs)) {
+        allLogs.push(...currentUser.activeGoal.logs);
+      }
+      if (Array.isArray(currentUser.completedGoals)) {
+        currentUser.completedGoals.forEach((g) => {
+          if (Array.isArray(g.logs)) allLogs.push(...g.logs);
+        });
+      }
+
+      if (allLogs.length === 0) return 0;
+
+      // Kumpulkan tanggal unik (YYYY-MM-DD)
+      const uniqueDates = new Set(
+        allLogs.map((l) => {
+          const d = new Date(l.timestamp);
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        })
+      );
+
+      const sorted = Array.from(uniqueDates).sort().reverse();
+      let streak = 1;
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const curr = new Date(sorted[i] + 'T00:00:00');
+        const prev = new Date(sorted[i + 1] + 'T00:00:00');
+        const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    // =========================================================================
+    // TAB 1: HOME SCREEN RENDERING & DEPOSIT LOGIC
+    // =========================================================================
+    function getGreetingText() {
+      const hr = new Date().getHours();
+      if (hr < 12) return 'Good Morning,';
+      if (hr < 18) return 'Good Afternoon,';
+      return 'Good Evening,';
+    }
+
+    function isGoalTargetReached(goal) {
+      return goal && Number(goal.savedAmount) >= Number(goal.targetAmount);
+    }
+
+    function renderHomeScreen() {
+      if (!currentUser) return;
+
+      document.getElementById('greeting-time').textContent = getGreetingText();
+      document.getElementById('greeting-name').textContent = `${currentUser.name}!`;
+      document.getElementById('header-avatar-img').src = currentUser.avatar;
+
+      const streak = calculateStreakDays();
+      document.getElementById('home-streak-days').textContent = streak;
+
+      const goal = currentUser.activeGoal;
+      const activeView = document.getElementById('home-active-goal-view');
+      const emptyView = document.getElementById('home-empty-goal-view');
+
+      if (!goal) {
+        activeView.classList.add('hidden');
+        emptyView.classList.remove('hidden');
+      } else {
+        emptyView.classList.add('hidden');
+        activeView.classList.remove('hidden');
+
+        const pct = Math.min(100, Math.round((goal.savedAmount / goal.targetAmount) * 100));
+        document.getElementById('home-goal-name').textContent = goal.name;
+        document.getElementById('home-goal-saved').textContent = formatRupiah(goal.savedAmount);
+        document.getElementById('home-goal-target').textContent = formatRupiah(goal.targetAmount);
+        document.getElementById('home-goal-percent').textContent = `${pct}%`;
+        document.getElementById('home-goal-bar').style.width = `${pct}%`;
+        document.getElementById('home-goal-image').src = goal.image || 'https://placehold.co/160x160/cedba5/1f2d24?text=ITEM';
+
+        const freqLabel = goal.frequencyType === 'everyday'
+          ? 'Every day'
+          : `Once every ${goal.customDays} days`;
+        document.getElementById('home-goal-freq').textContent = freqLabel;
+
+        const doneDate = new Date(goal.doneTime);
+        document.getElementById('home-goal-deadline').textContent = isNaN(doneDate)
+          ? '-'
+          : `Target: ${doneDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+      }
+
+      updateBoxLockUI();
+    }
+
+    function updateBoxLockUI() {
+      const goal = currentUser ? currentUser.activeGoal : null;
+      const unlocked = isGoalTargetReached(goal);
+
+      const iconBadge = document.getElementById('lock-icon-badge');
+      const statusBadge = document.getElementById('box-lock-status-badge');
+      const lockDesc = document.getElementById('box-lock-desc');
+      const openBtn = document.getElementById('open-keypad-btn');
+      const openBtnText = document.getElementById('open-keypad-btn-text');
+      const servoPill = document.getElementById('servo-state-pill');
+
+      servoPill.textContent = boxIsOpen ? 'Servo: 90° (Terbuka)' : 'Servo: 0° (Tutup)';
+
+      if (unlocked) {
+        iconBadge.className = 'w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0';
+        iconBadge.innerHTML = `
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+          </svg>`;
+
+        statusBadge.className = 'text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+        statusBadge.textContent = 'SIAP DIBUKA';
+        lockDesc.textContent = 'Target 100% tercapai! Masukkan PIN (default 1234) + # pada keypad untuk membuka kotak.';
+
+        openBtn.className = 'w-full py-3 rounded-2xl bg-forest text-cream font-display font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 shadow-sm hover:bg-forestLight active:scale-[0.99] transition cursor-pointer';
+        openBtnText.textContent = 'Buka Kotak (Keypad Digital)';
+      } else {
+        // Pastikan kotak terkunci rapat jika target belum tercapai
+        boxIsOpen = false;
+        servoPill.textContent = 'Servo: 0° (Tutup)';
+
+        iconBadge.className = 'w-11 h-11 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0';
+        iconBadge.innerHTML = `
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>`;
+
+        statusBadge.className = 'text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-100 text-red-700';
+        statusBadge.textContent = 'TERKUNCI';
+        lockDesc.textContent = 'Kotak tidak bisa dibuka sampai goals tercapai apapun kondisinya.';
+
+        openBtn.className = 'w-full py-3 rounded-2xl bg-forest/15 text-forest/45 font-display font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 cursor-not-allowed';
+        openBtnText.textContent = 'Terkunci — Target Belum Tercapai';
+      }
+    }
+
+    function depositMoney(amount) {
+      if (!currentUser || !currentUser.activeGoal) {
+        showToast('Buat goal terlebih dahulu sebelum menabung.', 'warning');
+        return;
+      }
+
+      const goal = currentUser.activeGoal;
+      const wasReachedBefore = isGoalTargetReached(goal);
+
+      goal.savedAmount = Number(goal.savedAmount) + Number(amount);
+      goal.logs.unshift({
+        amount: Number(amount),
+        timestamp: new Date().toISOString(),
+        cumulative: goal.savedAmount
+      });
+
+      saveCurrentUserState();
+      renderHomeScreen();
+      if (currentTab === 'center') renderCenterTab();
+
+      playKeyBeep(1046, 0.08);
+      showToast(`Uang Terdeteksi: +${formatRupiah(amount)} masuk!`, 'success');
+
+      // Cek apakah baru saja mencapai atau melebihi target
+      if (isGoalTargetReached(goal)) {
+        if (!wasReachedBefore) {
+          playCelebrationJingle();
+        }
+        openCelebrationModal(goal);
+      }
+    }
+
+    // =========================================================================
+    // TAB 2: CENTER '+' TAB (MODE A: NEW GOALS | MODE B: CONTROL PANEL)
+    // =========================================================================
+    function setDefaultGoalDates() {
+      const now = new Date();
+      const nextMonth = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const toLocalInput = (d) => {
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+      const startInput = document.getElementById('goal-start-time');
+      const doneInput = document.getElementById('goal-done-time');
+      if (startInput && !startInput.value) startInput.value = toLocalInput(now);
+      if (doneInput && !doneInput.value) doneInput.value = toLocalInput(nextMonth);
+    }
+
+    document.getElementById('goal-frequency-select').addEventListener('change', (e) => {
+      const customWrap = document.getElementById('custom-days-wrapper');
+      if (e.target.value === 'custom_days') {
+        customWrap.classList.remove('hidden');
+      } else {
+        customWrap.classList.add('hidden');
+      }
+    });
+
+    document.querySelectorAll('input[name="amountMode"]').forEach((radio) => {
+      radio.addEventListener('change', (e) => {
+        const specWrap = document.getElementById('specific-amount-wrapper');
+        if (e.target.value === 'specific') {
+          specWrap.classList.remove('hidden');
+        } else {
+          specWrap.classList.add('hidden');
+        }
+      });
+    });
+
+    document.getElementById('goal-pic-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          const dataUrl = await readFileAsDataURL(file);
+          document.getElementById('new-goal-pic-preview').src = dataUrl;
+        } catch (err) {}
+      }
+    });
+
+    function selectPresetGoalImage(label, bgHex) {
+      const cleanHex = bgHex.replace('#', '');
+      document.getElementById('new-goal-pic-preview').src =
+        `https://placehold.co/200x200/${cleanHex}/1f2d24?text=${encodeURIComponent(label)}`;
+      document.getElementById('goal-pic-file').value = '';
+    }
+
+    document.getElementById('new-goal-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      // Proteksi aturan: hanya boleh ada 1 goal aktif
+      if (currentUser.activeGoal) {
+        showToast('Kamu sudah punya 1 goal aktif! Selesaikan dulu sebelum membuat yang baru.', 'warning');
+        renderCenterTab();
+        return;
+      }
+
+      const name = document.getElementById('goal-name-input').value.trim();
+      const targetAmount = Number(document.getElementById('goal-target-input').value);
+      const frequencyType = document.getElementById('goal-frequency-select').value;
+      const customDays = Number(document.getElementById('goal-custom-days').value) || 2;
+      const amountMode = document.querySelector('input[name="amountMode"]:checked').value;
+      const specificAmount = Number(document.getElementById('goal-specific-amount').value) || 0;
+      const startTime = document.getElementById('goal-start-time').value;
+      const doneTime = document.getElementById('goal-done-time').value;
+      const image = document.getElementById('new-goal-pic-preview').src;
+
+      if (targetAmount < 1000) {
+        showToast('Target nominal minimal Rp 1.000.', 'error');
+        return;
+      }
+
+      currentUser.activeGoal = {
+        id: 'goal_' + Date.now(),
+        name,
+        targetAmount,
+        savedAmount: 0,
+        frequencyType,
+        customDays,
+        amountMode,
+        specificAmount,
+        startTime: new Date(startTime).toISOString(),
+        doneTime: new Date(doneTime).toISOString(),
+        image,
+        status: 'active',
+        logs: []
+      };
+
+      boxIsOpen = false;
+      saveCurrentUserState();
+      document.getElementById('new-goal-form').reset();
+      setDefaultGoalDates();
+      selectPresetGoalImage('GOAL', '#cedba5');
+
+      showToast(`Goal "${name}" dimulai! Kotak otomatis terkunci hingga target tercapai.`, 'success');
+      switchTab('home');
+    });
+
+    function renderCenterTab() {
+      if (!currentUser) return;
+      const newMode = document.getElementById('new-goal-mode');
+      const cpMode = document.getElementById('control-panel-mode');
+
+      if (!currentUser.activeGoal) {
+        cpMode.classList.add('hidden');
+        newMode.classList.remove('hidden');
+        setDefaultGoalDates();
+        return;
+      }
+
+      // Mode B: Control Panel & Log Tabungan
+      newMode.classList.add('hidden');
+      cpMode.classList.remove('hidden');
+
+      const goal = currentUser.activeGoal;
+      const pct = Math.min(100, Math.round((goal.savedAmount / goal.targetAmount) * 100));
+
+      document.getElementById('cp-goal-name').textContent = goal.name;
+      document.getElementById('cp-goal-percent').textContent = `${pct}%`;
+      document.getElementById('cp-goal-saved').textContent = formatRupiah(goal.savedAmount);
+      document.getElementById('cp-goal-target').textContent = formatRupiah(goal.targetAmount);
+      document.getElementById('cp-goal-bar').style.width = `${pct}%`;
+
+      const modeText = goal.amountMode === 'specific' && goal.specificAmount > 0
+        ? `Mode: Specific (${formatRupiah(goal.specificAmount)}/setor)`
+        : 'Mode: Any Amount';
+      document.getElementById('cp-goal-mode-info').textContent = modeText;
+
+      const logs = goal.logs || [];
+      document.getElementById('cp-log-count').textContent = `${logs.length}x setor`;
+
+      const listEl = document.getElementById('cp-deposit-log-list');
+      if (logs.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-4 rounded-2xl bg-cream text-center text-xs text-forestLight">
+            Belum ada uang masuk. Gunakan simulasi di Home atau masukkan uang ke celengan fisik ESP32.
+          </div>`;
+        return;
+      }
+
+      const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      listEl.innerHTML = logs.map((item, index) => {
+        const dt = new Date(item.timestamp);
+        const hari = namaHari[dt.getDay()];
+        const tgl = dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        const jam = dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        return `
+          <div class="flex items-center justify-between p-3 rounded-2xl bg-cream/80 border border-forest/10">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-matcha text-forest font-extrabold text-xs flex items-center justify-center">
+                #${logs.length - index}
+              </div>
+              <div>
+                <p class="text-xs font-extrabold text-forest">+${formatRupiah(item.amount)}</p>
+                <p class="text-[11px] text-forestLight">${hari}, ${tgl} • <strong>${jam}</strong></p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] font-semibold text-forestLight block">Total</span>
+              <span class="text-xs font-bold text-forest">${formatRupiah(item.cumulative)}</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function openKeypadFromControlPanel() {
+      handleOpenKeypadClick();
+    }
+
+    function confirmCancelActiveGoal() {
+      showCustomConfirm(
+        'Batalkan Goal Aktif?',
+        'Data progress goal yang sedang berjalan akan dihapus agar kamu bisa membuat goal baru.',
+        () => {
+          currentUser.activeGoal = null;
+          boxIsOpen = false;
+          saveCurrentUserState();
+          renderCenterTab();
+          updateCenterNavBadge();
+          showToast('Goal aktif dibatalkan. Sekarang kamu bisa membuat goal baru.', 'info');
+        }
+      );
+    }
+
+    // =========================================================================
+    // DIGITAL 4x4 KEYPAD (SYNCED WITH ESP32 PIN, ALARM & 90° SERVO LOGIC)
+    // =========================================================================
+    function handleOpenKeypadClick() {
+      const goal = currentUser ? currentUser.activeGoal : null;
+      if (!isGoalTargetReached(goal)) {
+        playKeyBeep(220, 0.15);
+        showToast('Kotak terkunci! Target goal harus tercapai 100% terlebih dahulu.', 'error');
+        return;
+      }
+
+      keypadBuffer = '';
+      updateOledKeypadScreen(
+        boxIsOpen ? 'KUNCI: TERBUKA' : 'KUNCI: TERTUTUP',
+        'Masukkan PIN + # | 0# Tutup'
+      );
+      document.getElementById('keypad-modal').classList.remove('hidden');
+    }
+
+    function closeKeypadModal() {
+      stopAlarmBuzzer();
+      document.getElementById('keypad-modal').classList.add('hidden');
+      renderHomeScreen();
+    }
+
+    function updateOledKeypadScreen(topStatus, subMsg) {
+      document.getElementById('oled-top-status').textContent = topStatus;
+      document.getElementById('oled-servo-angle').textContent = boxIsOpen ? 'SERVO: 90°' : 'SERVO: 0°';
+      document.getElementById('oled-pin-display').textContent =
+        keypadBuffer.length === 0 ? '----' : '*'.repeat(keypadBuffer.length);
+      document.getElementById('oled-sub-message').textContent = subMsg;
+    }
+
+    function pressKeypadKey(key) {
+      if (!currentUser) return;
+
+      // Jika alarm berbunyi karena PIN salah, hanya '*' yang bisa mematikannya (persis ESP32)
+      if (alarmActive) {
+        if (key === '*') {
+          stopAlarmBuzzer();
+          keypadBuffer = '';
+          updateOledKeypadScreen(
+            boxIsOpen ? 'KUNCI: TERBUKA' : 'KUNCI: TERTUTUP',
+            'Alarm stop. Coba lagi'
+          );
+        } else {
+          updateOledKeypadScreen('ALARM! TEKAN * STOP', 'PIN Salah! Tekan *');
+        }
+        return;
+      }
+
+      playKeyBeep(820, 0.05);
+
+      if (key === '*') {
+        keypadBuffer = '';
+        updateOledKeypadScreen(
+          boxIsOpen ? 'KUNCI: TERBUKA' : 'KUNCI: TERTUTUP',
+          'Input dihapus'
+        );
+        return;
+      }
+
+      if (key === '#') {
+        const userPin = currentUser.pin || '1234';
+        if (keypadBuffer === '0') {
+          boxIsOpen = false;
+          keypadBuffer = '';
+          updateOledKeypadScreen('KUNCI: TERTUTUP', 'Ditutup (0#) - Servo 0°');
+          showToast('Kotak ditutup kembali (0#).', 'info');
+        } else if (keypadBuffer === userPin) {
+          boxIsOpen = true;
+          keypadBuffer = '';
+          updateOledKeypadScreen('KUNCI: TERBUKA', 'PIN BENAR! Servo 90°');
+          showToast('PIN Benar! Kunci celengan terbuka (90°).', 'success');
+        } else {
+          keypadBuffer = '';
+          startAlarmBuzzer();
+          updateOledKeypadScreen('ALARM! TEKAN * STOP', 'PIN SALAH! Tekan *');
+        }
+        updateBoxLockUI();
+        return;
+      }
+
+      if (keypadBuffer.length < 8) {
+        keypadBuffer += key;
+        updateOledKeypadScreen(
+          boxIsOpen ? 'KUNCI: TERBUKA' : 'KUNCI: TERTUTUP',
+          'Tekan # untuk Enter'
+        );
+      }
+    }
+
+    // =========================================================================
+    // CELEBRATION MODAL & DOWNLOADABLE PNG CARD GENERATOR
+    // =========================================================================
+    function openCelebrationModal(goal) {
+      const surplus = Math.max(0, Number(goal.savedAmount) - Number(goal.targetAmount));
+      const streak = calculateStreakDays();
+
+      document.getElementById('celeb-goal-name').textContent = goal.name;
+      document.getElementById('celeb-target-amount').textContent = formatRupiah(goal.targetAmount);
+      document.getElementById('celeb-saved-amount').textContent = formatRupiah(goal.savedAmount);
+      document.getElementById('celeb-surplus-amount').textContent = formatRupiah(surplus);
+      document.getElementById('celeb-streak').textContent = `${streak} Hari`;
+      document.getElementById('celeb-date').textContent = new Date().toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      const surplusNote = document.getElementById('celeb-surplus-note');
+      if (surplus > 0) {
+        surplusNote.textContent = `Selamat! Ada kelebihan ${formatRupiah(surplus)} dari targetmu, semua tersimpan aman!`;
+      } else {
+        surplusNote.textContent = 'Target tercapai tepat 100%! Selamat atas konsistensimu!';
+      }
+
+      document.getElementById('celeb-download-btn').onclick = () => {
+        downloadGoalCardPNG({
+          ...goal,
+          surplusAmount: surplus,
+          streakDays: streak,
+          completedAt: new Date().toISOString()
+        });
+      };
+
+      document.getElementById('celebration-modal').classList.remove('hidden');
+    }
+
+    function closeCelebrationAndOpenKeypad() {
+      document.getElementById('celebration-modal').classList.add('hidden');
+      handleOpenKeypadClick();
+    }
+
+    function archiveCompletedGoal() {
+      if (!currentUser || !currentUser.activeGoal) return;
+      const goal = currentUser.activeGoal;
+      const surplus = Math.max(0, Number(goal.savedAmount) - Number(goal.targetAmount));
+
+      const archived = {
+        ...goal,
+        status: 'completed',
+        surplusAmount: surplus,
+        streakDays: calculateStreakDays(),
+        completedAt: new Date().toISOString()
+      };
+
+      currentUser.completedGoals.unshift(archived);
+      currentUser.activeGoal = null;
+      boxIsOpen = false;
+      saveCurrentUserState();
+
+      document.getElementById('celebration-modal').classList.add('hidden');
+      updateCenterNavBadge();
+      switchTab('account');
+      showToast('Goal diarsipkan ke All Goals! Sekarang kamu bisa membuat goal baru.', 'success');
+    }
+
+    // Render Cool Achievement Card on HTML5 Canvas & Trigger Download
+    function downloadGoalCardPNG(goalData) {
+      const canvas = document.getElementById('export-card-canvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Background Deep Forest Slate
+      ctx.fillStyle = '#1f2d24';
+      ctx.fillRect(0, 0, W, H);
+
+      // Decorative Soft Matcha Accent Circle
+      ctx.fillStyle = 'rgba(206, 219, 165, 0.14)';
+      ctx.beginPath();
+      ctx.arc(W - 90, 90, 210, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Outer Rounded Border
+      ctx.strokeStyle = '#cedba5';
+      ctx.lineWidth = 6;
+      roundRectPath(ctx, 24, 24, W - 48, H - 48, 32);
+      ctx.stroke();
+
+      // Header Tag
+      ctx.fillStyle = '#cedba5';
+      roundRectPath(ctx, 56, 54, 280, 38, 19);
+      ctx.fill();
+
+      ctx.fillStyle = '#1f2d24';
+      ctx.font = '800 16px Inter, sans-serif';
+      ctx.fillText('CELENGAN PINTAR • ACHIEVEMENT', 74, 79);
+
+      // User Name
+      ctx.fillStyle = '#fff8e6';
+      ctx.font = '600 18px Inter, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Penabung: ${currentUser ? currentUser.name : 'User'}`, W - 56, 79);
+      ctx.textAlign = 'left';
+
+      // Goal Title
+      ctx.fillStyle = '#fff8e6';
+      ctx.font = '800 42px Plus Jakarta Sans, Inter, sans-serif';
+      ctx.fillText(goalData.name, 56, 150);
+
+      // Status Subtitle
+      const isDone = Number(goalData.savedAmount) >= Number(goalData.targetAmount);
+      ctx.fillStyle = '#cedba5';
+      ctx.font = '600 20px Inter, sans-serif';
+      ctx.fillText(
+        isDone ? 'Selamat! Target tabungan berhasil tercapai!' : 'Progress Tabungan Celengan Pintar',
+        56,
+        186
+      );
+
+      // 3 Stat Boxes
+      const surplus = Math.max(0, Number(goalData.savedAmount) - Number(goalData.targetAmount));
+      const boxes = [
+        { label: 'TARGET GOAL', value: formatRupiah(goalData.targetAmount), bg: '#2b3d32', text: '#fff8e6' },
+        { label: 'TOTAL TERKUMPUL', value: formatRupiah(goalData.savedAmount), bg: '#2b3d32', text: '#cedba5' },
+        { label: 'KELEBIHAN DANA', value: formatRupiah(surplus), bg: '#cedba5', text: '#1f2d24' }
+      ];
+
+      boxes.forEach((b, idx) => {
+        const bx = 56 + idx * 268;
+        const by = 225;
+        const bw = 250;
+        const bh = 128;
+
+        ctx.fillStyle = b.bg;
+        roundRectPath(ctx, bx, by, bw, bh, 22);
+        ctx.fill();
+
+        ctx.fillStyle = idx === 2 ? 'rgba(31,45,36,0.75)' : 'rgba(255,248,230,0.7)';
+        ctx.font = '700 14px Inter, sans-serif';
+        ctx.fillText(b.label, bx + 20, by + 36);
+
+        ctx.fillStyle = b.text;
+        ctx.font = '800 24px Plus Jakarta Sans, Inter, sans-serif';
+        ctx.fillText(b.value, bx + 20, by + 84);
+      });
+
+      // Footer Metadata
+      const logsCount = Array.isArray(goalData.logs) ? goalData.logs.length : 0;
+      const streakVal = goalData.streakDays || calculateStreakDays();
+      const dateStr = new Date(goalData.completedAt || Date.now()).toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      ctx.fillStyle = 'rgba(255, 248, 230, 0.85)';
+      ctx.font = '600 18px Inter, sans-serif';
+      ctx.fillText(`Streak: ${streakVal} Hari   •   Frekuensi Setor: ${logsCount}x   •   Tanggal: ${dateStr}`, 56, 420);
+
+      // Progress Bar Graphic at Bottom
+      const pct = Math.min(1, Number(goalData.savedAmount) / Math.max(1, Number(goalData.targetAmount)));
+      ctx.fillStyle = '#2b3d32';
+      roundRectPath(ctx, 56, 450, W - 112, 24, 12);
+      ctx.fill();
+
+      ctx.fillStyle = '#cedba5';
+      roundRectPath(ctx, 56, 450, Math.max(24, (W - 112) * pct), 24, 12);
+      ctx.fill();
+
+      // Trigger Download
+      const link = document.createElement('a');
+      const safeName = goalData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      link.download = `celengan-goal-${safeName}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      showToast('Kartu statistik goal berhasil diunduh (PNG)!', 'success');
+    }
+
+    function roundRectPath(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    // =========================================================================
+    // TAB 3: ACCOUNT, STATISTICS CHART, ALL GOALS & SETTINGS
+    // =========================================================================
+    function renderAccountScreen() {
+      if (!currentUser) return;
+      renderStatisticsChart();
+      renderAllGoalsList();
+      populateAccountSettings();
+    }
+
+    function collectAllLogs() {
+      const logs = [];
+      if (currentUser.activeGoal && Array.isArray(currentUser.activeGoal.logs)) {
+        logs.push(...currentUser.activeGoal.logs);
+      }
+      if (Array.isArray(currentUser.completedGoals)) {
+        currentUser.completedGoals.forEach((g) => {
+          if (Array.isArray(g.logs)) logs.push(...g.logs);
+        });
+      }
+      return logs;
+    }
+
+    function renderStatisticsChart() {
+      if (!currentUser) return;
+      const period = document.getElementById('stats-period-select').value;
+      const logs = collectAllLogs();
+      const now = new Date();
+
+      let labels = [];
+      let values = [];
+      let badgeText = '';
+
+      if (period === 'weekly') {
+        badgeText = '7 Hari Terakhir';
+        const hariSingkat = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+          labels.push(hariSingkat[d.getDay()]);
+          const sum = logs
+            .filter((l) => {
+              const ld = new Date(l.timestamp);
+              return ld.getFullYear() === d.getFullYear() && ld.getMonth() === d.getMonth() && ld.getDate() === d.getDate();
+            })
+            .reduce((acc, cur) => acc + Number(cur.amount), 0);
+          values.push(sum);
+        }
+      } else if (period === 'monthly') {
+        badgeText = '4 Minggu Terakhir';
+        for (let w = 3; w >= 0; w--) {
+          labels.push(`Mgg ${4 - w}`);
+          const endMs = now.getTime() - w * 7 * 86400000;
+          const startMs = endMs - 7 * 86400000;
+          const sum = logs
+            .filter((l) => {
+              const t = new Date(l.timestamp).getTime();
+              return t > startMs && t <= endMs;
+            })
+            .reduce((acc, cur) => acc + Number(cur.amount), 0);
+          values.push(sum);
+        }
+      } else {
+        badgeText = '6 Bulan Terakhir';
+        const bulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        for (let m = 5; m >= 0; m--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - m, 1);
+          labels.push(bulanSingkat[d.getMonth()]);
+          const sum = logs
+            .filter((l) => {
+              const ld = new Date(l.timestamp);
+              return ld.getFullYear() === d.getFullYear() && ld.getMonth() === d.getMonth();
+            })
+            .reduce((acc, cur) => acc + Number(cur.amount), 0);
+          values.push(sum);
+        }
+      }
+
+      const totalPeriod = values.reduce((a, b) => a + b, 0);
+      document.getElementById('stats-total-period').textContent = formatRupiah(totalPeriod);
+      document.getElementById('stats-period-badge').textContent = badgeText;
+
+      // Draw Responsive Canvas Bar Chart
+      const canvas = document.getElementById('stats-canvas');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.max(280, rect.width) * dpr;
+      canvas.height = Math.max(150, rect.height) * dpr;
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const W = canvas.width / dpr;
+      const H = canvas.height / dpr;
+      ctx.clearRect(0, 0, W, H);
+
+      const padLeft = 12;
+      const padRight = 12;
+      const padTop = 22;
+      const padBottom = 26;
+      const chartW = W - padLeft - padRight;
+      const chartH = H - padTop - padBottom;
+
+      // Baseline
+      ctx.strokeStyle = 'rgba(31, 45, 36, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(padLeft, padTop + chartH);
+      ctx.lineTo(W - padRight, padTop + chartH);
+      ctx.stroke();
+
+      const maxVal = Math.max(...values, 10000);
+      const count = labels.length;
+      const slotW = chartW / count;
+      const barW = Math.min(34, slotW * 0.56);
+
+      values.forEach((val, idx) => {
+        const barH = Math.max(6, (val / maxVal) * (chartH - 8));
+        const x = padLeft + idx * slotW + (slotW - barW) / 2;
+        const y = padTop + chartH - barH;
+
+        ctx.fillStyle = val > 0 ? '#1f2d24' : '#cedba5';
+        roundRectPath(ctx, x, y, barW, barH, 8);
+        ctx.fill();
+
+        // Value label above bar if > 0
+        if (val > 0) {
+          ctx.fillStyle = '#1f2d24';
+          ctx.font = '700 9px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          const shortVal = val >= 1000 ? `${Math.round(val / 1000)}k` : `${val}`;
+          ctx.fillText(shortVal, x + barW / 2, y - 5);
+        }
+
+        // X-axis label
+        ctx.fillStyle = '#33483b';
+        ctx.font = '700 10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[idx], x + barW / 2, padTop + chartH + 16);
+      });
+    }
+
+    function renderAllGoalsList() {
+      const container = document.getElementById('all-goals-list');
+      const allGoals = [];
+      if (currentUser.activeGoal) allGoals.push(currentUser.activeGoal);
+      if (Array.isArray(currentUser.completedGoals)) allGoals.push(...currentUser.completedGoals);
+
+      if (allGoals.length === 0) {
+        container.innerHTML = `
+          <div class="rounded-2xl bg-white border border-forest/12 p-4 text-center text-xs text-forestLight">
+            Belum ada riwayat goal. Buat goal pertamamu di tombol (+) tengah!
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = allGoals.map((g, idx) => {
+        const isCompleted = g.status === 'completed' || Number(g.savedAmount) >= Number(g.targetAmount);
+        const surplus = Math.max(0, Number(g.savedAmount) - Number(g.targetAmount));
+        const pct = Math.min(100, Math.round((g.savedAmount / g.targetAmount) * 100));
+
+        return `
+          <div class="rounded-3xl bg-white border-2 border-forest/12 p-4 shadow-card space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <img src="${g.image || 'https://placehold.co/100x100/cedba5/1f2d24?text=GOAL'}"
+                  onerror="this.src='https://placehold.co/100x100/cedba5/1f2d24?text=GOAL'"
+                  alt="${g.name}" class="w-12 h-12 rounded-2xl object-cover border border-forest/15 flex-shrink-0" />
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${isCompleted ? 'bg-matcha text-forest' : 'bg-creamDark text-forestLight'}">
+                      ${isCompleted ? 'Tercapai' : 'Aktif'}
+                    </span>
+                    ${surplus > 0 ? `<span class="text-[10px] font-bold text-emerald-700">+${formatRupiah(surplus)} lebih</span>` : ''}
+                  </div>
+                  <h3 class="font-display font-extrabold text-sm text-forest truncate mt-0.5">${g.name}</h3>
+                  <p class="text-[11px] text-forestLight">${formatRupiah(g.savedAmount)} / ${formatRupiah(g.targetAmount)} (${pct}%)</p>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" onclick="downloadGoalByIndex(${idx})"
+              class="w-full py-2.5 rounded-xl bg-cream hover:bg-matcha text-forest font-bold text-xs border border-forest/15 flex items-center justify-center gap-1.5 transition cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+              </svg>
+              Download Card (PNG)
+            </button>
+          </div>`;
+      }).join('');
+    }
+
+    function downloadGoalByIndex(idx) {
+      const allGoals = [];
+      if (currentUser.activeGoal) allGoals.push(currentUser.activeGoal);
+      if (Array.isArray(currentUser.completedGoals)) allGoals.push(...currentUser.completedGoals);
+      if (allGoals[idx]) {
+        downloadGoalCardPNG(allGoals[idx]);
+      }
+    }
+
+    function populateAccountSettings() {
+      if (!currentUser) return;
+      document.getElementById('settings-name').value = currentUser.name;
+      document.getElementById('settings-pin').value = currentUser.pin || '1234';
+
+      const notifBtn = document.getElementById('notif-toggle-btn');
+      if (currentUser.notifEnabled) {
+        notifBtn.textContent = 'Aktif ✓';
+        notifBtn.className = 'px-3 py-1.5 rounded-xl bg-matcha text-forest border border-forest/20 font-extrabold text-xs flex-shrink-0 cursor-pointer';
+      } else {
+        notifBtn.textContent = 'Aktifkan';
+        notifBtn.className = 'px-3 py-1.5 rounded-xl bg-forest text-cream font-bold text-xs flex-shrink-0 cursor-pointer';
+      }
+    }
+
+    document.getElementById('account-settings-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const newName = document.getElementById('settings-name').value.trim();
+      const newPin = document.getElementById('settings-pin').value.trim();
+      const avatarFile = document.getElementById('settings-avatar').files[0];
+
+      if (!/^\d{4}$/.test(newPin)) {
+        showToast('PIN celengan harus 4 digit angka!', 'error');
+        return;
+      }
+
+      currentUser.name = newName || currentUser.name;
+      currentUser.pin = newPin;
+
+      if (avatarFile) {
+        try {
+          currentUser.avatar = await readFileAsDataURL(avatarFile);
+        } catch (err) {}
+      }
+
+      saveCurrentUserState();
+      populateAccountSettings();
+      showToast('Pengaturan akun & PIN celengan tersimpan!', 'success');
+    });
+
+    async function toggleNotificationReminder() {
+      if (!currentUser) return;
+
+      if (currentUser.notifEnabled) {
+        currentUser.notifEnabled = false;
+        saveCurrentUserState();
+        populateAccountSettings();
+        showToast('Pengingat notifikasi dimatikan.', 'info');
+        return;
+      }
+
+      if ('Notification' in window) {
+        try {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            new Notification('Celengan Pintar', {
+              body: 'Pengingat menabung aktif! Jangan lupa isi celenganmu hari ini.'
+            });
+          }
+        } catch (e) {}
+      }
+
+      currentUser.notifEnabled = true;
+      saveCurrentUserState();
+      populateAccountSettings();
+      showToast('Pengingat notifikasi harian diaktifkan!', 'success');
+    }
+
+    // =========================================================================
+    // WINDOW RESIZE & INITIALIZATION
+    // =========================================================================
+    window.addEventListener('resize', () => {
+      if (currentUser && currentTab === 'account') {
+        renderStatisticsChart();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      ensureDemoUserExists();
+      const savedSessionId = localStorage.getItem(STORAGE_SESSION_KEY);
+      const users = getAllUsers();
+
+      if (savedSessionId && users[savedSessionId]) {
+        currentUser = users[savedSessionId];
+        enterAuthenticatedApp();
+      } else {
+        document.getElementById('auth-screen').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
